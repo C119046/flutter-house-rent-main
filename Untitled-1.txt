@@ -1,0 +1,225 @@
+List<Piece> getPieces() {
+    final pieces = <Piece>[];
+    draw();
+    drawFood();
+
+    // 1
+    for (var i = 0; i < length; ++i) {
+      // 2
+      if (i >= positions.length) {
+        continue;
+      }
+
+      // 3
+      pieces.add(
+        Piece(
+          posX: positions[i].dx.toInt(),
+          posY: positions[i].dy.toInt(),
+          // 4
+          size: step,
+          color: Colors.red,
+        ),
+      );
+    }
+
+    return pieces;
+      void draw() async {
+    // 1
+    if (positions.length == 0) {
+      positions.add(getRandomPositionWithinRange());
+    }
+
+    // 2
+    while (length > positions.length) {
+      positions.add(positions[positions.length - 1]);
+    }
+
+    // 3
+    for (var i = positions.length - 1; i > 0; i--) {
+      positions[i] = positions[i - 1];
+    }
+
+    // 4
+    positions[0] = await getNextPosition(positions[0]);
+  }
+   Future<Offset> getNextPosition(Offset position) async {
+    Offset nextPosition;
+
+    if (direction == Direction.right) {
+      nextPosition = Offset(position.dx + step, position.dy);
+    } else if (direction == Direction.left) {
+      nextPosition = Offset(position.dx - step, position.dy);
+    } else if (direction == Direction.up) {
+      nextPosition = Offset(position.dx, position.dy - step);
+    } else if (direction == Direction.down) {
+      nextPosition = Offset(position.dx, position.dy + step);
+    }
+
+    return nextPosition;
+  }
+   return Scaffold(
+    body: Container(
+      color: Color(0XFFF5BB00),
+      child: Stack(
+        children: [
+          Stack(
+            children: getPieces(),
+          ),
+        ],
+      ),
+    ),
+  );
+  oid changeSpeed() {
+    if (timer != null && timer.isActive) timer.cancel();
+
+    timer = Timer.periodic(Duration(milliseconds: 200 ~/ speed), (timer) {
+      setState(() {});
+    });
+  }
+   Widget getControls() {
+    return ControlPanel( // 1
+      onTapped: (Direction newDirection) { // 2
+        direction = newDirection; // 3
+      },
+    );
+  }
+    import 'control_panel.dart';
+    override
+Widget build(BuildContext context) {
+  // ...
+  return Scaffold(
+    body: Container(
+      color: Color(0XFFF5BB00),
+      child: Stack(
+        children: [
+          Stack(
+            children: getPieces(),
+          ),
+          getControls(),
+        ],
+      ),
+    ),
+  );
+}
+ void drawFood() {
+
+    // 1
+    if (foodPosition == null) {
+      foodPosition = getRandomPositionWithinRange();
+    }
+
+    // 2
+    food = Piece(
+      posX: foodPosition.dx.toInt(),
+      posY: foodPosition.dy.toInt(),
+      size: step,
+      color: Color(0XFF8EA604),
+      isAnimated: true,
+    );
+  }
+  @override
+Widget build(BuildContext context) {
+  //...
+  return Scaffold(
+    body: Container(
+      color: Color(0XFFF5BB00),
+      child: Stack(
+        children: [
+          Stack(
+            children: getPieces(),
+          ),
+          getControls(),
+          food,
+        ],
+      ),
+    ),
+  );
+}
+ void drawFood() {
+
+    // ...
+
+    if (foodPosition == positions[0]) {
+      length++;
+      speed = speed + 0.25;
+      score = score + 5;
+      changeSpeed();
+
+      foodPosition = getRandomPositionWithinRange();
+    }
+
+    // ...
+  }
+  @override
+Widget build(BuildContext context) {
+  //...
+  return Scaffold(
+      body: Container(
+        color: Color(0XFFF5BB00),
+        child: Stack(
+          children: [
+            getPlayAreaBorder(),
+            Stack(
+              children: getPieces(),
+            ),
+            getControls(),
+            food,
+          ],
+        ),
+      ),
+    );
+}
+ bool detectCollision(Offset position) {
+
+    if (position.dx >= upperBoundX && direction == Direction.right) {
+      return true;
+    } else if (position.dx <= lowerBoundX && direction == Direction.left) {
+      return true;
+    } else if (position.dy >= upperBoundY && direction == Direction.down) {
+      return true;
+    } else if (position.dy <= lowerBoundY && direction == Direction.up) {
+      return true;
+    }
+
+    return false;
+  }
+   void restart() {
+
+    score = 0;
+    length = 5;
+    positions = [];
+    direction = getRandomDirection();
+    speed = 1;
+
+    changeSpeed();
+  }
+    Widget getScore() {
+    return Positioned(
+      top: 50.0,
+      right: 40.0,
+      child: Text(
+        "Score: " + score.toString(),
+        style: TextStyle(fontSize: 24.0),
+      ),
+    );
+  }
+  @override
+Widget build(BuildContext context) {
+  //...
+  return Scaffold(
+    body: Container(
+      color: Color(0XFFF5BB00),
+      child: Stack(
+        children: [
+          getPlayAreaBorder(),
+          Stack(
+            children: getPieces(),
+          ),
+          getControls(),
+          food,
+          getScore(),
+        ],
+      ),
+    ),
+  );
+}
